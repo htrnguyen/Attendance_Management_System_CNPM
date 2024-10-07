@@ -81,6 +81,8 @@ Trước khi bắt đầu, hãy đảm bảo bạn có:
 
         ```
 
+---
+
 # Cấu Trúc Cây Thư Mục
 
 Dưới đây là cấu trúc cây thư mục của dự án và mô tả chức năng của từng phần:
@@ -147,10 +149,94 @@ Dưới đây là cấu trúc cây thư mục của dự án và mô tả chức
 -   **Program.cs:**
     -   Điểm bắt đầu của ứng dụng, nơi khởi chạy chương trình.
 
-## Hướng Dẫn Sử Dụng
+---
 
-1. **Khởi Chạy Ứng Dụng:**
+# Cơ sở dữ liệu: Attendance_Management_System_CNPM
 
-    - Mở dự án trong Visual Studio.
-    - Thiết lập `Program.cs` làm dự án khởi động.
-    - Nhấn `F5` để chạy ứng dụng.
+## Bảng Roles
+
+-   **roleID**: Khóa chính, định danh vai trò.
+-   **roleName**: Tên của vai trò (Sinh viên, Giáo viên, Admin).
+
+## Bảng Users
+
+-   **userID**: Khóa chính, định danh người dùng.
+-   **username**: Tên đăng nhập, duy nhất.
+-   **password**: Mật khẩu của người dùng.
+-   **email**: Email của người dùng, duy nhất, định dạng hợp lệ.
+-   **fullname**: Tên đầy đủ của người dùng.
+-   **roleID**: Khóa ngoại, liên kết với bảng Roles.
+
+## Bảng Terms
+
+-   **termID**: Khóa chính, định danh kỳ học.
+-   **termName**: Tên của kỳ học.
+-   **startDate**: Ngày bắt đầu kỳ học.
+-   **endDate**: Ngày kết thúc kỳ học.
+
+## Bảng Courses
+
+-   **courseID**: Khóa chính, định danh khóa học.
+-   **courseName**: Tên của khóa học.
+-   **courseCode**: Mã của khóa học.
+-   **termID**: Khóa ngoại, liên kết với bảng Terms.
+
+## Bảng CourseAssignments
+
+-   **assignmentID**: Khóa chính, định danh phân công khóa học.
+-   **courseID**: Khóa ngoại, liên kết với bảng Courses.
+-   **teacherID**: Khóa ngoại, liên kết với bảng Users.
+
+## Bảng Groups
+
+-   **groupID**: Khóa chính, định danh nhóm.
+-   **courseID**: Khóa ngoại, liên kết với bảng Courses.
+-   **groupName**: Tên của nhóm.
+-   **sessionTime**: Thời gian học của nhóm.
+-   **classroom**: Phòng học của nhóm.
+
+## Bảng Enrollments
+
+-   **enrollmentID**: Khóa chính, định danh đăng ký.
+-   **studentID**: Khóa ngoại, liên kết với bảng Users.
+-   **groupID**: Khóa ngoại, liên kết với bảng Groups.
+
+## Bảng Sessions
+
+-   **sessionID**: Khóa chính, định danh buổi học.
+-   **courseID**: Khóa ngoại, liên kết với bảng Courses.
+-   **weekNumber**: Số tuần của buổi học.
+-   **sessionDate**: Ngày diễn ra buổi học.
+
+## Bảng Announcements
+
+-   **announcementID**: Khóa chính, định danh thông báo.
+-   **sessionID**: Khóa ngoại, liên kết với bảng Sessions.
+-   **content**: Nội dung thông báo.
+
+## Bảng AttendanceLinks
+
+-   **linkID**: Khóa chính, định danh liên kết điểm danh.
+-   **sessionID**: Khóa ngoại, liên kết với bảng Sessions.
+-   **teacherID**: Khóa ngoại, liên kết với bảng Users.
+-   **latitude**: Vĩ độ của vị trí điểm danh.
+-   **longitude**: Kinh độ của vị trí điểm danh.
+
+## Bảng Attendances
+
+-   **attendanceID**: Khóa chính, định danh điểm danh.
+-   **studentID**: Khóa ngoại, liên kết với bảng Users.
+-   **sessionID**: Khóa ngoại, liên kết với bảng Sessions.
+-   **status**: Trạng thái điểm danh (Có mặt, Vắng mặt).
+-   **checkedInAt**: Thời gian điểm danh.
+-   **latitude**: Vĩ độ của vị trí điểm danh.
+-   **longitude**: Kinh độ của vị trí điểm danh.
+
+## Cấu trúc thư mục
+
+-   **BLL (Business Logic Layer):** Xử lý logic nghiệp vụ.
+-   **DAL (Data Access Layer):** Truy cập dữ liệu.
+-   **Models:** Mô hình dữ liệu.
+-   **PL (Presentation Layer):** Giao diện người dùng.
+-   **Resources:** Cấu hình và tài nguyên.
+-   **Program.cs:** Điểm bắt đầu của ứng dụng.
