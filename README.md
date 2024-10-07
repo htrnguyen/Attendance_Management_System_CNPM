@@ -1,82 +1,145 @@
-## **1. Tóm tắt yêu cầu chức năng chính**
+# Hướng Dẫn Cài
 
-### **1.1. Quản lý người dùng**
+Hướng dẫn này sẽ giúp bạn từng bước thiết lập môi trường dự án, tạo một Google Sheet, tải dữ liệu từ file Excel lên, chia sẻ bảng tính, và lấy ID của bảng tính.
 
--   **Sinh viên** và **giáo viên** đều có tài khoản để truy cập hệ thống.
--   Người dùng có thể xem các **kỳ học** mà họ đã tham gia hoặc đã dạy.
+## Yêu Cầu Trước Khi Bắt Đầu
 
-### **1.2. Quản lý kỳ học**
+Trước khi bắt đầu, hãy đảm bảo bạn có:
 
--   Trong mỗi kỳ học, người dùng có thể xem các **môn học** họ đã học hoặc đã dạy.
+-   Một tài khoản Google
+-   Quyền truy cập vào Google Sheets
+-   [Tải file Excel chứa dữ liệu về](./QuanLyDiemDanh.xlsx)
+-   Kết nối Internet
 
-### **1.3. Quản lý môn học**
+## Bước 1: Thiết Lập Môi Trường Dự Án
 
--   Trong mỗi môn học, người dùng có thể xem chi tiết của từng **tuần học**.
--   Trong mỗi tuần học, người dùng có thể xem các **thông báo** và **link điểm danh**.
+1. **Clone Repository**
 
-### **1.4. Giáo viên tạo link điểm danh**
+    ```bash
+    git clone https://github.com/htrnguyen/Attendance_Management_System_CNPM.git
+    cd Attendance_Management_System_CNPM
+    ```
 
--   Giáo viên có thể tạo một link điểm danh cho một tuần học cụ thể.
--   Hệ thống sẽ ghi nhận vị trí (kinh độ và vĩ độ) của giáo viên khi tạo link.
+## Bước 2: Tạo Google Sheet và Tải Dữ Liệu
 
-### **1.5. Sinh viên kiểm tra vị trí**
+1. **Tạo Google Sheet Mới**
 
--   Sinh viên sẽ nhận được link điểm danh và khi truy cập, hệ thống sẽ ghi nhận vị trí hiện tại của họ (kinh độ và vĩ độ).
--   Hệ thống sẽ so sánh vị trí của sinh viên với vị trí của giáo viên để xác định xem sinh viên có đủ điều kiện để điểm danh hay không.
+    - Truy cập [Google Sheets](https://sheets.google.com).
+    - Tạo một bảng tính mới.
 
-### **1.6. Điểm danh**
+2. **Tải Dữ Liệu Từ Excel**
+    - Mở Google Sheet mới của bạn.
+    - Nhấn vào `Tệp` > `Nhập`.
+    - Chọn `Tải lên` và chọn file Excel `QuanLyDiemDanh.xlsx` để nhập dữ liệu
+    - Làm theo hướng dẫn để nhập dữ liệu vào Google Sheet.
 
--   Nếu sinh viên ở trong khoảng cách cho phép (ví dụ: 100 mét), họ sẽ được đánh dấu là có mặt.
--   Nếu không, họ sẽ được đánh dấu là vắng mặt.
+## Bước 3: Chia Sẻ Google Sheet
 
-## **2. Thiết kế cơ sở dữ liệu**
+1. **Chia Sẻ Với Tài Khoản Dịch Vụ**
+    - Nhấn vào nút `Chia sẻ` ở góc trên bên phải của Google Sheet.
+    - Trong trường `Chia sẻ với mọi người và nhóm`, nhập email:
+        ```
+        attendancesystem@attendancesystemapi-437006.iam.gserviceaccount.com
+        ```
+    - Đảm bảo quyền được đặt là `Người chỉnh sửa`.
+    - Nhấn `Gửi`.
 
-Dựa trên các yêu cầu trên, dưới đây là thiết kế cơ sở dữ liệu với các bảng và mối quan hệ giữa chúng.
+## Bước 4: Lấy ID Của Bảng Tính
 
-### **2.1. Sơ đồ ER (Entity-Relationship Diagram)**
+1. **Sao Chép ID Của Bảng Tính**
 
--   **Users** (Người dùng)
+    - Nhìn vào URL của Google Sheet. Nó sẽ trông giống như sau:
+        ```
+        https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit#gid=0
+        ```
+    - Sao chép phần URL có dạng `SPREADSHEET_ID`. Đây là ID của bảng tính của bạn.
 
-    -   Một người dùng có thể là **Sinh viên**, **Giáo viên**, hoặc **Admin**.
+## Bước 5: Cấu Hình Mã Nguồn
 
--   **Roles** (Vai trò)
+1. **Thay Thế Tên Bảng và `spreadsheetId`**
 
-    -   Các vai trò như **Sinh viên**, **Giáo viên**, **Admin**.
+    - Mở file `GoogleSheetsRepository.cs` trong thư mục `AttendanceManagementSystem\DAL`.
+    - Tìm dòng sau và thay thế `QuanLyDiemDanh` ở dòng **38** bằng tên bảng của bạn.
+        ```
+        ApplicationName = "QuanLyDiemDanh"
+        ```
+    - Tìm và thay thế `YOUR_SPREADSHEET_ID` ở dòng **41** bằng `spreadsheetId` của bạn:
 
--   **Terms** (Kỳ học)
+        ```
+        _spreadsheetId = "YOUR_SPREADSHEET_ID";
 
-    -   Mỗi kỳ học có nhiều **Môn học**.
+        ```
 
--   **Courses** (Môn học)
+# Cấu Trúc Cây Thư Mục
 
-    -   Mỗi môn học thuộc về một kỳ học.
-    -   Một môn học có thể được **giảng dạy bởi nhiều giáo viên**.
-    -   Một môn học có nhiều **Nhóm học**.
+Dưới đây là cấu trúc cây thư mục của dự án và mô tả chức năng của từng phần:
 
--   **CourseTeachers** (Giảng viên dạy môn học)
+```
+- Properties
+- References
+- BLL (Business Logic Layer)
+  - StudentBLL.cs
+  - TeacherBLL.cs
+  - UserBLL.cs
+- DAL (Data Access Layer)
+  - DataLoader.cs
+  - GoogleSheetsRepository.cs
+  - SQLiteRepository.cs
+  - StudentDAL.cs
+  - TeacherDAL.cs
+  - UserDAL.cs
+- Models
+  - Announcements.cs
+  - Courses.cs
+  - Terms.cs
+  - User.cs
+  - Weeks.cs
+- PL (Presentation Layer)
+  - Admin
+  - Login
+    - ChangePassword.cs
+    - ForgotPassword.cs
+    - LoginForm.cs
+    - MainForm.cs
+  - Student
+    - StudentCourses.cs
+    - StudentWeeks.cs
+  - Teacher
+    - TeacherCourses.cs
+    - TeacherWeeks.cs
+  - MainDashboard.cs
+- Resources
+  - App.config
+  - packages.config
+- Program.cs
+```
 
-    -   Liên kết giữa **Giáo viên** và **Môn học** (Many-to-Many).
+### Chức Năng Của Từng Phần
 
--   **Groups** (Nhóm học)
+-   **Properties:** Chứa các thiết lập và thông tin cấu hình của dự án.
+-   **References:** Chứa các tham chiếu đến các thư viện và gói cần thiết cho dự án.
+-   **BLL (Business Logic Layer):**
+    -   Chứa các lớp xử lý logic nghiệp vụ cho sinh viên, giáo viên và người dùng.
+-   **DAL (Data Access Layer):**
+    -   `DataLoader.cs`: Xử lý việc tải dữ liệu.
+    -   `GoogleSheetsRepository.cs`: Quản lý kết nối và thao tác với Google Sheets.
+    -   `SQLiteRepository.cs`: Quản lý kết nối và thao tác với cơ sở dữ liệu SQLite.
+    -   `StudentDAL.cs`, `TeacherDAL.cs`, `UserDAL.cs`: Quản lý dữ liệu cho sinh viên, giáo viên và người dùng.
+-   **Models:**
+    -   Chứa các lớp mô hình dữ liệu, đại diện cho các thực thể như **User, Terms, Courses, ...**
+-   **PL (Presentation Layer):**
+    -   `Admin`, `Login`, `Student`, `Teacher`: Chứa các lớp giao diện người dùng cho từng phần chức năng.
+    -   `MainDashboard.cs`: Giao diện chính của ứng dụng.
+-   **Resources:**
+    -   `App.config`: Cấu hình ứng dụng.
+    -   `packages.config`: Danh sách các gói NuGet được sử dụng.
+-   **Program.cs:**
+    -   Điểm bắt đầu của ứng dụng, nơi khởi chạy chương trình.
 
-    -   Mỗi nhóm học thuộc về một môn học.
+## Hướng Dẫn Sử Dụng
 
--   **Enrollments** (Đăng ký môn học)
+1. **Khởi Chạy Ứng Dụng:**
 
-    -   Liên kết giữa **Sinh viên** và **Môn học**, bao gồm **Nhóm học** mà sinh viên tham gia.
-
--   **Sessions** (Tuần học)
-
-    -   Mỗi tuần học thuộc về một môn học.
-
--   **Announcements** (Thông báo)
-
-    -   Mỗi thông báo thuộc về một tuần học cụ thể.
-
--   **Attendances** (Điểm danh)
-
-    -   Ghi nhận điểm danh của sinh viên trong từng tuần học.
-
--   **AttendanceLinks** (Link điểm danh)
-
-    -   Lưu trữ các link điểm danh mà giáo viên tạo ra.
+    - Mở dự án trong Visual Studio.
+    - Thiết lập `Program.cs` làm dự án khởi động.
+    - Nhấn `F5` để chạy ứng dụng.

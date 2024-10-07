@@ -38,11 +38,11 @@ namespace AttendanceManagementSystem.DAL
                 ApplicationName = "QuanLyDiemDanh"
             });
 
-            _spreadsheetId = "1bTyUFW5CplUfh_TW1dg6HEiZzwgQJgnzLMk8eUmk4-k";
+            _spreadsheetId = "YOUR_SPREADSHEET_ID";
         }
 
         // Lấy dữ liệu từ một phạm vi của bảng tính
-        public async Task<IList<IList<object>>> GetSheetData(string sheetRange)
+        public async Task<IList<IList<object>>>     (string sheetRange)
         {
             try
             {
