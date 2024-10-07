@@ -42,7 +42,7 @@ namespace AttendanceManagementSystem.DAL
         }
 
         // Lấy dữ liệu từ một phạm vi của bảng tính
-        public async Task<IList<IList<object>>>     (string sheetRange)
+        public async Task<IList<IList<object>>> GetSheetData(string sheetRange)
         {
             try
             {
