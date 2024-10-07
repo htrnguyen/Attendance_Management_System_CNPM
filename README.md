@@ -20,6 +20,17 @@ Trước khi bắt đầu, hãy đảm bảo bạn có:
     cd Attendance_Management_System_CNPM
     ```
 
+2. **Khởi Động Lại Dự Án**
+
+    - Mở dự án trong Visual Studio.
+    - Thiết lập `Program.cs` làm dự án khởi động.
+    - Nhấn `F5` để chạy ứng dụng.
+    - Nếu gặp lỗi, hãy cài đặt gói `System.Data.SQLite` bằng lệnh sau trong Package Manager Console:
+
+    ```powershell
+    Install-Package System.Data.SQLite
+    ```
+
 ## Bước 2: Tạo Google Sheet và Tải Dữ Liệu
 
 1. **Tạo Google Sheet Mới**
