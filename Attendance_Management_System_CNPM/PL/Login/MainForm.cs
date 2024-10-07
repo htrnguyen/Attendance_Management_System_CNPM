@@ -67,16 +67,23 @@ namespace Attendance_Management_System_CNPM.PL.Login
         }
         private void InitializeLoadingPictureBox()
         {
-            pictureBoxLoad = new PictureBox
+            string imagePath = Path.Combine(Application.StartupPath, @"..\..\Resources\images", "loading3.gif");
+            if (File.Exists(imagePath))
             {
-                Image = Image.FromFile(Path.Combine(Application.StartupPath, "image", "loading3.gif")),
-                SizeMode = PictureBoxSizeMode.Zoom,
-                Dock = DockStyle.Fill,
-                Visible = false
-            };
-            this.Controls.Add(pictureBoxLoad);
+                pictureBoxLoad = new PictureBox
+                {
+                    Image = Image.FromFile(imagePath),
+                    SizeMode = PictureBoxSizeMode.Zoom,
+                    Dock = DockStyle.Fill,
+                    Visible = false
+                };
+                this.Controls.Add(pictureBoxLoad);
+            }
+            else
+            {
+                MessageBox.Show("Loading image not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
-
         // Hiển thị Form lên panelMain
         public void ShowForm(Form form)
         {
