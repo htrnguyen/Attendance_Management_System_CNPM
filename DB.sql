@@ -61,16 +61,28 @@ CREATE TABLE CourseAssignments (
 );
 GO
 
+-- Tạo bảng Classes
+CREATE TABLE Classes (
+    classID INT PRIMARY KEY IDENTITY(1,1),
+    classCode NVARCHAR(20) NOT NULL UNIQUE,
+    className NVARCHAR(100) NOT NULL
+);
+GO
+select * from Classes
+
 -- Tạo bảng Groups
 CREATE TABLE Groups (
     groupID INT PRIMARY KEY IDENTITY(1,1),
     courseID INT,
+    classID INT,
     groupName NVARCHAR(100) NOT NULL,
     sessionTime NVARCHAR(20) NOT NULL,
     classroom NVARCHAR(50) NOT NULL,
-    FOREIGN KEY (courseID) REFERENCES Courses(courseID) ON DELETE CASCADE
+    FOREIGN KEY (courseID) REFERENCES Courses(courseID) ON DELETE CASCADE,
+    FOREIGN KEY (classID) REFERENCES Classes(classID)
 );
 GO
+select * from Groups
 
 -- Tạo bảng Enrollments
 CREATE TABLE Enrollments (
@@ -82,35 +94,37 @@ CREATE TABLE Enrollments (
 );
 GO
 
--- Tạo bảng Sessions
-CREATE TABLE Sessions (
-    sessionID INT PRIMARY KEY IDENTITY(1,1),
+-- Tạo bảng Weeks
+CREATE TABLE Weeks (
+    weekID INT PRIMARY KEY IDENTITY(1,1),
     courseID INT,
     weekNumber INT NOT NULL,
-    sessionDate DATE NOT NULL,
+    startDate DATE NOT NULL,
+    endDate DATE NOT NULL,
     FOREIGN KEY (courseID) REFERENCES Courses(courseID) ON DELETE CASCADE
 );
 GO
 
-select * from Groups
+
+select * from 
 
 -- Tạo bảng Announcements
 CREATE TABLE Announcements (
     announcementID INT PRIMARY KEY IDENTITY(1,1),
-    sessionID INT,
+    weekID INT,
     content NVARCHAR(MAX) NOT NULL,
-    FOREIGN KEY (sessionID) REFERENCES Sessions(sessionID) ON DELETE CASCADE
+    FOREIGN KEY (weekID) REFERENCES Weeks(weekID) ON DELETE CASCADE
 );
 GO
 
 -- Tạo bảng AttendanceLinks
 CREATE TABLE AttendanceLinks (
     linkID INT PRIMARY KEY IDENTITY(1,1),
-    sessionID INT,
+    weekID INT,
     teacherID INT,
     latitude FLOAT NOT NULL,
     longitude FLOAT NOT NULL,
-    FOREIGN KEY (sessionID) REFERENCES Sessions(sessionID) ON DELETE CASCADE,
+    FOREIGN KEY (weekID) REFERENCES Weeks(weekID) ON DELETE CASCADE,
     FOREIGN KEY (teacherID) REFERENCES Users(userID) ON DELETE CASCADE
 );
 GO
@@ -119,13 +133,13 @@ GO
 CREATE TABLE Attendances (
     attendanceID INT PRIMARY KEY IDENTITY(1,1),
     studentID INT,
-    sessionID INT,
+    weekID INT,
     status NVARCHAR(20) NOT NULL CHECK (status IN ('Có mặt', 'Vắng mặt')),
     checkedInAt DATETIME,
     latitude FLOAT,
     longitude FLOAT,
     FOREIGN KEY (studentID) REFERENCES Users(userID) ON DELETE CASCADE,
-    FOREIGN KEY (sessionID) REFERENCES Sessions(sessionID) ON DELETE CASCADE
+    FOREIGN KEY (weekID) REFERENCES Weeks(weekID) ON DELETE CASCADE
 );
 GO
 
@@ -171,8 +185,6 @@ INSERT INTO Courses (courseName, courseCode, termID) VALUES
 ('An toàn thông tin', 'SEC101', 3);
 GO
 
-select * from Courses
-
 -- Dữ liệu mẫu cho bảng CourseAssignments
 INSERT INTO CourseAssignments (courseID, teacherID) VALUES
 (1, 11),
@@ -189,84 +201,100 @@ INSERT INTO CourseAssignments (courseID, teacherID) VALUES
 (12, 14);
 GO
 
+-- Dữ liệu mẫu cho bảng Classes
+INSERT INTO Classes (classCode, className) VALUES
+('CLS101', 'Lớp Toán Cao Cấp'),
+('CLS102', 'Lớp Vật Lý Đại Cương'),
+('CLS103', 'Lớp Lập Trình Java'),
+('CLS104', 'Lớp Cơ Sở Dữ Liệu'),
+('CLS105', 'Lớp Giải Tích'),
+('CLS106', 'Lớp Hóa Học'),
+('CLS107', 'Lớp Xác Suất Thống Kê'),
+('CLS108', 'Lớp Lập Trình C++'),
+('CLS109', 'Lớp Khoa Học Máy Tính'),
+('CLS110', 'Lớp Kỹ Thuật Phần Mềm'),
+('CLS111', 'Lớp Mạng Máy Tính'),
+('CLS112', 'Lớp An Toàn Thông Tin');
+GO
+
 -- Dữ liệu mẫu cho bảng Groups
-INSERT INTO Groups (courseID, groupName, sessionTime, classroom) VALUES
-(1, 'Nhóm 1', '08:00-09:30', 'Phòng 101'),
-(1, 'Nhóm 2', '10:00-11:30', 'Phòng 102'),
-(2, 'Nhóm 1', '13:00-14:30', 'Phòng 201'),
-(3, 'Nhóm A', '15:00-16:30', 'Phòng 202'),
-(3, 'Nhóm B', '08:00-09:30', 'Phòng 301'),
-(4, 'Nhóm Alpha', '10:00-11:30', 'Phòng 302'),
-(5, 'Nhóm 1', '13:00-14:30', 'Phòng 401'),
-(5, 'Nhóm 2', '15:00-16:30', 'Phòng 402'),
-(6, 'Nhóm 1', '08:00-09:30', 'Phòng 501'),
-(7, 'Nhóm A', '10:00-11:30', 'Phòng 502'),
-(7, 'Nhóm B', '13:00-14:30', 'Phòng 601'),
-(8, 'Nhóm Alpha', '15:00-16:30', 'Phòng 602'),
-(9, 'Nhóm 1', '08:00-09:30', 'Phòng 701'),
-(9, 'Nhóm 2', '10:00-11:30', 'Phòng 702'),
-(10, 'Nhóm 1', '13:00-14:30', 'Phòng 801'),
-(11, 'Nhóm A', '15:00-16:30', 'Phòng 802'),
-(11, 'Nhóm B', '08:00-09:30', 'Phòng 901'),
-(12, 'Nhóm Alpha', '10:00-11:30', 'Phòng 902');
+INSERT INTO Groups (courseID, classID, groupName, sessionTime, classroom) VALUES
+(1, 1, 'Nhóm 1', '08:00-09:30', 'Phòng 101'),
+(1, 1, 'Nhóm 2', '10:00-11:30', 'Phòng 102'),
+(2, 2, 'Nhóm 1', '13:00-14:30', 'Phòng 201'),
+(3, 3, 'Nhóm A', '15:00-16:30', 'Phòng 202'),
+(3, 3, 'Nhóm B', '08:00-09:30', 'Phòng 301'),
+(4, 4, 'Nhóm Alpha', '10:00-11:30', 'Phòng 302'),
+(5, 5, 'Nhóm 1', '13:00-14:30', 'Phòng 401'),
+(5, 5, 'Nhóm 2', '15:00-16:30', 'Phòng 402'),
+(6, 6, 'Nhóm 1', '08:00-09:30', 'Phòng 501'),
+(7, 7, 'Nhóm A', '10:00-11:30', 'Phòng 502'),
+(7, 7, 'Nhóm B', '13:00-14:30', 'Phòng 601'),
+(8, 8, 'Nhóm Alpha', '15:00-16:30', 'Phòng 602'),
+(9, 9, 'Nhóm 1', '08:00-09:30', 'Phòng 701'),
+(9, 9, 'Nhóm 2', '10:00-11:30', 'Phòng 702'),
+(10, 10, 'Nhóm 1', '13:00-14:30', 'Phòng 801'),
+(11, 11, 'Nhóm A', '15:00-16:30', 'Phòng 802'),
+(11, 11, 'Nhóm B', '08:00-09:30', 'Phòng 901'),
+(12, 12, 'Nhóm Alpha', '10:00-11:30', 'Phòng 902');
 GO
 
 -- Dữ liệu mẫu cho bảng Enrollments
 INSERT INTO Enrollments (studentID, groupID) VALUES
 (1, 1),
 (2, 1),
-(1, 3),
-(2, 4),
-(1, 5),
-(3, 1),
-(4, 2),
-(3, 6),
-(4, 7),
-(5, 8),
-(6, 1),
-(7, 2),
-(6, 9),
-(7, 10),
-(8, 11),
-(9, 1),
-(10, 2),
-(9, 12),
-(10, 13);
+(3, 2),
+(4, 3),
+(5, 4),
+(6, 5),
+(7, 6),
+(8, 7),
+(9, 8),
+(10, 9),
+(1, 10),
+(2, 11),
+(3, 12),
+(4, 13),
+(5, 14),
+(6, 15),
+(7, 16),
+(8, 17),
+(9, 18);
 GO
 
--- Dữ liệu mẫu cho bảng Sessions
-INSERT INTO Sessions (courseID, weekNumber, sessionDate) VALUES
-(1, 1, '2023-09-05'),
-(1, 2, '2023-09-12'),
-(2, 1, '2023-09-06'),
-(3, 1, '2024-02-05'),
-(4, 1, '2024-02-06'),
-(5, 1, '2023-09-05'),
-(5, 2, '2023-09-12'),
-(6, 1, '2023-09-06'),
-(7, 1, '2024-02-05'),
-(8, 1, '2024-02-06'),
-(9, 1, '2023-09-05'),
-(9, 2, '2023-09-12'),
-(10, 1, '2023-09-06'),
-(11, 1, '2024-02-05'),
-(12, 1, '2024-02-06'),
-(1, 3, '2023-09-19'),
-(2, 2, '2023-09-13'),
-(3, 2, '2024-02-12'),
-(4, 2, '2024-02-13'),
-(5, 3, '2023-09-26'),
-(6, 2, '2023-09-13'),
-(7, 2, '2024-02-12'),
-(8, 2, '2024-02-13'),
-(9, 3, '2023-09-26'),
-(10, 2, '2023-09-13'),
-(11, 2, '2024-02-12'),
-(12, 2, '2024-02-13');
+-- Dữ liệu mẫu cho bảng Weeks
+INSERT INTO Weeks (courseID, weekNumber, startDate, endDate) VALUES
+(1, 1, '2023-09-01', '2023-09-07'),
+(1, 2, '2023-09-08', '2023-09-14'),
+(2, 1, '2023-09-01', '2023-09-07'),
+(3, 1, '2024-02-01', '2024-02-07'),
+(4, 1, '2024-02-01', '2024-02-07'),
+(5, 1, '2023-09-01', '2023-09-07'),
+(5, 2, '2023-09-08', '2023-09-14'),
+(6, 1, '2023-09-01', '2023-09-07'),
+(7, 1, '2024-02-01', '2024-02-07'),
+(8, 1, '2024-02-01', '2024-02-07'),
+(9, 1, '2023-09-01', '2023-09-07'),
+(9, 2, '2023-09-08', '2023-09-14'),
+(10, 1, '2023-09-01', '2023-09-07'),
+(11, 1, '2024-02-01', '2024-02-07'),
+(12, 1, '2024-02-01', '2024-02-07'),
+(1, 3, '2023-09-15', '2023-09-21'),
+(2, 2, '2023-09-08', '2023-09-14'),
+(3, 2, '2024-02-08', '2024-02-14'),
+(4, 2, '2024-02-08', '2024-02-14'),
+(5, 3, '2023-09-15', '2023-09-21'),
+(6, 2, '2023-09-08', '2023-09-14'),
+(7, 2, '2024-02-08', '2024-02-14'),
+(8, 2, '2024-02-08', '2024-02-14'),
+(9, 3, '2023-09-15', '2023-09-21'),
+(10, 2, '2023-09-08', '2023-09-14'),
+(11, 2, '2024-02-08', '2024-02-14'),
+(12, 2, '2024-02-08', '2024-02-14');
 GO
 
 -- Dữ liệu mẫu cho bảng Announcements
-INSERT INTO Announcements (sessionID, content) VALUES
+INSERT INTO Announcements (weekID, content) VALUES
 (1, 'Bài tập về nhà tuần 1'),
 (2, 'Ôn tập cho bài kiểm tra giữa kỳ'),
 (3, 'Chuẩn bị bài thuyết trình'),
@@ -297,7 +325,7 @@ INSERT INTO Announcements (sessionID, content) VALUES
 GO
 
 -- Dữ liệu mẫu cho bảng AttendanceLinks
-INSERT INTO AttendanceLinks (sessionID, teacherID, latitude, longitude) VALUES
+INSERT INTO AttendanceLinks (weekID, teacherID, latitude, longitude) VALUES
 (1, 11, 21.0278, 105.8519), -- Hà Nội
 (2, 12, 10.7626, 106.6602), -- Hồ Chí Minh
 (3, 11, 21.0278, 105.8519),
@@ -328,148 +356,25 @@ INSERT INTO AttendanceLinks (sessionID, teacherID, latitude, longitude) VALUES
 GO
 
 -- Dữ liệu mẫu cho bảng Attendances
-INSERT INTO Attendances (studentID, sessionID, status, checkedInAt, latitude, longitude) VALUES
+INSERT INTO Attendances (studentID, weekID, status, checkedInAt, latitude, longitude) VALUES
 (1, 1, 'Có mặt', '2023-09-05 08:00', 21.03, 105.85),
 (2, 1, 'Vắng mặt', NULL, NULL, NULL),
-(1, 2, 'Có mặt', '2023-09-12 08:05', 21.032, 105.851),
-(2, 3, 'Có mặt', '2023-09-06 08:30', 10.76, 106.66),
-(3, 1, 'Có mặt', '2023-09-05 08:00', 21.03, 105.85),
-(4, 2, 'Vắng mặt', NULL, NULL, NULL),
 (3, 2, 'Có mặt', '2023-09-12 08:05', 21.032, 105.851),
 (4, 3, 'Có mặt', '2023-09-06 08:30', 10.76, 106.66),
-(5, 1, 'Có mặt', '2023-09-05 08:00', 21.03, 105.85),
-(6, 2, 'Vắng mặt', NULL, NULL, NULL),
-(5, 2, 'Có mặt', '2023-09-12 08:05', 21.032, 105.851),
-(6, 3, 'Có mặt', '2023-09-06 08:30', 10.76, 106.66),
-(7, 1, 'Có mặt', '2023-09-05 08:00', 21.03, 105.85),
-(8, 2, 'Vắng mặt', NULL, NULL, NULL),
-(7, 2, 'Có mặt', '2023-09-12 08:05', 21.032, 105.851),
-(8, 3, 'Có mặt', '2023-09-06 08:30', 10.76, 106.66),
-(9, 1, 'Có mặt', '2023-09-05 08:00', 21.03, 105.85),
-(10, 2, 'Vắng mặt', NULL, NULL, NULL),
-(9, 2, 'Có mặt', '2023-09-12 08:05', 21.032, 105.851),
-(10, 3, 'Có mặt', '2023-09-06 08:30', 10.76, 106.66);
-GO
-
--- Sinh viên
-SELECT DISTINCT 
-    c.courseID, 
-    c.courseName, 
-    c.courseCode,
-    g.groupName,
-    g.sessionTime,
-    g.classroom,
-    u_teacher.userID 
-FROM 
-    Enrollments e
-JOIN 
-    Groups g ON e.groupID = g.groupID
-JOIN 
-    Courses c ON g.courseID = c.courseID
-JOIN 
-    Terms t ON c.termID = t.termID
-JOIN 
-    Users u ON e.studentID = u.userID
-JOIN 
-    CourseAssignments ca ON c.courseID = ca.courseID
-JOIN 
-    Users u_teacher ON ca.teacherID = u_teacher.userID
-WHERE 
-    u.userID = 1
-    AND u.roleID = 1
-    AND t.termID = 1
-ORDER BY 
-    c.courseID, g.groupName;
-
--- Giáo viên
-SELECT DISTINCT 
-    c.courseID, 
-    c.courseName, 
-    c.courseCode,
-    g.groupName,
-    g.sessionTime,
-    g.classroom
-FROM 
-    CourseAssignments ca
-JOIN 
-    Courses c ON ca.courseID = c.courseID
-JOIN 
-    Groups g ON c.courseID = g.courseID
-JOIN 
-    Terms t ON c.termID = t.termID
-JOIN 
-    Users u ON ca.teacherID = u.userID
-WHERE 
-    u.userID = 11
-    AND u.roleID = 2 
-    AND t.termID = 1
-ORDER BY 
-    c.courseID, g.groupName;
-
-
--- Lấy tuần
-SELECT 
-	s.sessionID,
-    s.weekNumber,
-    s.sessionDate
-FROM 
-    Courses c
-JOIN 
-    Terms t ON c.termID = t.termID
-JOIN 
-    Sessions s ON c.courseID = s.courseID
-WHERE 
-    c.courseID = 1
-ORDER BY 
-    s.weekNumber, s.sessionDate;
-
-
-SELECT 
-    s.sessionID,
-    s.weekNumber,
-    s.sessionDate,
-    a.content AS announcementContent,
-    al.linkID AS attendanceLinkID,
-    al.latitude AS teacherLatitude,
-    al.longitude AS teacherLongitude
-FROM 
-    Sessions s
-LEFT JOIN 
-    Announcements a ON s.sessionID = a.sessionID
-LEFT JOIN 
-    AttendanceLinks al ON s.sessionID = al.sessionID
-WHERE 
-    s.sessionID = 1;
-
-SELECT 
-    a.announcementID,
-    a.content
-FROM 
-    Announcements a
-JOIN 
-    Sessions s ON a.sessionID = s.sessionID
-WHERE 
-    s.sessionID = 1
-
-
-SELECT 
-    al.linkID,
-    al.sessionID,
-    al.teacherID,
-    s.courseID,
-    c.courseCode,
-    s.weekNumber,
-    s.sessionDate,
-    u.fullname AS teacherName
-FROM 
-    AttendanceLinks al
-JOIN 
-    Sessions s ON al.sessionID = s.sessionID
-JOIN 
-    Courses c ON s.courseID = c.courseID
-JOIN 
-    Users u ON al.teacherID = u.userID
-WHERE 
-    s.sessionID = 1
-    AND c.courseID = 1
-    AND al.teacherID = 11;
+(5, 4, 'Có mặt', '2023-09-05 08:00', 21.03, 105.85),
+(6, 5, 'Vắng mặt', NULL, NULL, NULL),
+(7, 6, 'Có mặt', '2023-09-12 08:05', 21.032, 105.851),
+(8, 7, 'Có mặt', '2023-09-06 08:30', 10.76, 106.66),
+(9, 8, 'Có mặt', '2023-09-05 08:00', 21.03, 105.85),
+(10, 9, 'Vắng mặt', NULL, NULL, NULL),
+(1, 10, 'Có mặt', '2023-09-12 08:05', 21.032, 105.851),
+(2, 11, 'Có mặt', '2023-09-06 08:30', 10.76, 106.66),
+(3, 12, 'Có mặt', '2023-09-05 08:00', 21.03, 105.85),
+(4, 13, 'Vắng mặt', NULL, NULL, NULL),
+(5, 14, 'Có mặt', '2023-09-12 08:05', 21.032, 105.851),
+(6, 15, 'Có mặt', '2023-09-06 08:30', 10.76, 106.66),
+(7, 16, 'Có mặt', '2023-09-05 08:00', 21.03, 105.85),
+(8, 17, 'Vắng mặt', NULL, NULL, NULL),
+(9, 18, 'Có mặt', '2023-09-12 08:05', 21.032, 105.851),
+(10, 19, 'Có mặt', '2023-09-06 08:30', 10.76, 106.66);
+GO	

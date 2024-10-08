@@ -38,7 +38,7 @@ namespace AttendanceManagementSystem.DAL
                 ApplicationName = "QuanLyDiemDanh"
             });
 
-            _spreadsheetId = "1bTyUFW5CplUfh_TW1dg6HEiZzwgQJgnzLMk8eUmk4-k";
+            _spreadsheetId = "SPREADSHEET_ID";
         }
 
         // Lấy dữ liệu từ một phạm vi của bảng tính
