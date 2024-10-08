@@ -2,6 +2,8 @@
 using System.Data.SQLite;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace AttendanceManagementSystem.DAL
 {
@@ -13,8 +15,9 @@ namespace AttendanceManagementSystem.DAL
         {
             _connectionString = $"Data Source=attendance_database.db;Version=3;";
         }
+
         // Tạo bảng users trong SQLite
-         public void CreateDatabase()
+        public void CreateDatabase()
         {
             using (var connection = new SQLiteConnection(_connectionString))
             {
@@ -74,15 +77,26 @@ namespace AttendanceManagementSystem.DAL
                 )";
                 command.ExecuteNonQuery();
 
+                // Tạo bảng Classes
+                command.CommandText = @"
+                CREATE TABLE IF NOT EXISTS Classes (
+                    ClassID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ClassCode TEXT NOT NULL,
+                    ClassName TEXT NOT NULL
+                )";
+                command.ExecuteNonQuery();
+
                 // Tạo bảng Groups
                 command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS Groups (
                     GroupID INTEGER PRIMARY KEY AUTOINCREMENT,
                     CourseID INTEGER,
+                    ClassID INTEGER,
                     GroupName TEXT NOT NULL,
                     SessionTime TEXT NOT NULL,
                     ClassRoom TEXT NOT NULL,
                     FOREIGN KEY (CourseID) REFERENCES Courses(CourseID) ON DELETE CASCADE
+                    FOREIGN KEY (ClassID) REFERENCES Classes(ClassID) ON DELETE CASCADE
                 )";
                 command.ExecuteNonQuery();
 
@@ -97,13 +111,14 @@ namespace AttendanceManagementSystem.DAL
                 )";
                 command.ExecuteNonQuery();
 
-                // Tạo bảng Sessions
+                // Tạo bảng Weeks
                 command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS Sessions (
-                    SessionID INTEGER PRIMARY KEY AUTOINCREMENT,
+                CREATE TABLE IF NOT EXISTS Weeks (
+                    WeekID INTEGER PRIMARY KEY AUTOINCREMENT,
                     CourseID INTEGER,
                     WeekNumber INTEGER NOT NULL,
-                    SessionDate DATE NOT NULL,
+                    StartDate DATE NOT NULL,
+                    EndDate DATE NOT NULL,
                     FOREIGN KEY (CourseID) REFERENCES Courses(CourseID) ON DELETE CASCADE
                 )";
                 command.ExecuteNonQuery();
@@ -112,9 +127,9 @@ namespace AttendanceManagementSystem.DAL
                 command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS Announcements (
                     AnnouncementID INTEGER PRIMARY KEY AUTOINCREMENT,
-                    SessionID INTEGER,
+                    WeekID INTEGER,
                     Content TEXT NOT NULL,
-                    FOREIGN KEY (SessionID) REFERENCES Sessions(SessionID) ON DELETE CASCADE
+                    FOREIGN KEY (weekID) REFERENCES Weeks(weekID) ON DELETE CASCADE
                 )";
                 command.ExecuteNonQuery();
 
@@ -122,11 +137,11 @@ namespace AttendanceManagementSystem.DAL
                 command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS AttendanceLinks (
                     LinkID INTEGER PRIMARY KEY AUTOINCREMENT,
-                    SessionID INTEGER,
+                    WeekID INTEGER,
                     TeacherID INTEGER,
                     Latitude REAL NOT NULL,
                     Longitude REAL NOT NULL,
-                    FOREIGN KEY (SessionID) REFERENCES Sessions(SessionID) ON DELETE CASCADE,
+                    FOREIGN KEY (WeekID) REFERENCES Weeks(WeekID) ON DELETE CASCADE,
                     FOREIGN KEY (TeacherID) REFERENCES Users(UserID) ON DELETE CASCADE
                 )";
                 command.ExecuteNonQuery();
@@ -136,18 +151,18 @@ namespace AttendanceManagementSystem.DAL
                 CREATE TABLE IF NOT EXISTS Attendances (
                     AttendanceID INTEGER PRIMARY KEY AUTOINCREMENT,
                     StudentID INTEGER,
-                    SessionID INTEGER,
+                    WeekID INTEGER,
                     Status TEXT NOT NULL CHECK (Status IN ('Có mặt', 'Vắng mặt')),
                     CheckedInAt DATETIME,
                     Latitude REAL,
                     Longitude REAL,
                     FOREIGN KEY (StudentID) REFERENCES Users(UserID) ON DELETE CASCADE,
-                    FOREIGN KEY (SessionID) REFERENCES Sessions(SessionID) ON DELETE CASCADE
+                    FOREIGN KEY (WeekID) REFERENCES Weeks(WeekID) ON DELETE CASCADE
                 )";
                 command.ExecuteNonQuery();
             }
         }
-        // Xoá dữ liệu cũ trong toàn bộ bảng
+
         // Xoá dữ liệu cũ trong toàn bộ bảng
         public void ClearDatabase()
         {
@@ -166,13 +181,16 @@ namespace AttendanceManagementSystem.DAL
                 command.CommandText = "DELETE FROM Announcements";
                 command.ExecuteNonQuery();
 
-                command.CommandText = "DELETE FROM Sessions";
+                command.CommandText = "DELETE FROM Weeks";
                 command.ExecuteNonQuery();
 
                 command.CommandText = "DELETE FROM Enrollments";
                 command.ExecuteNonQuery();
 
                 command.CommandText = "DELETE FROM Groups";
+                command.ExecuteNonQuery();
+
+                command.CommandText = "DELETE FROM Classes";
                 command.ExecuteNonQuery();
 
                 command.CommandText = "DELETE FROM CourseAssignments";
@@ -195,6 +213,7 @@ namespace AttendanceManagementSystem.DAL
                 command.ExecuteNonQuery();
             }
         }
+
         // Chèn dữ liệu vào bảng Roles
         public async Task InsertRoleData(IList<IList<object>> roleData)
         {
@@ -301,7 +320,7 @@ namespace AttendanceManagementSystem.DAL
                     {
                         var row = courseData[i];
                         command.CommandText = @"
-                            INSERT INTO Courses (CourseName, CourseCode, TermID)
+                            INSERT INTO Courses (CourseName, CourseCode, TermID) 
                             VALUES (@CourseName, @CourseCode, @TermID);
                         ";
                         command.Parameters.AddWithValue("@CourseName", row[1]);
@@ -345,6 +364,35 @@ namespace AttendanceManagementSystem.DAL
                 }
             }
         }
+        // Chèn dữ liệu vào bảng Classes
+        public async Task InsertClassData(IList<IList<object>> classData)
+        {
+            using (var connection = new SQLiteConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                using (var transaction = connection.BeginTransaction())
+                {
+                    var command = connection.CreateCommand();
+                    command.Transaction = transaction;
+
+                    for (int i = 1; i < classData.Count; i++)
+                    {
+                        var row = classData[i];
+                        command.CommandText = @"
+                            INSERT INTO Classes (ClassCode, ClassName) 
+                            VALUES (@ClassCode, @ClassName);
+                        ";
+                        command.Parameters.AddWithValue("@ClassCode", row[1]);
+                        command.Parameters.AddWithValue("@ClassName", row[2]);
+
+                        await command.ExecuteNonQueryAsync();
+                        command.Parameters.Clear();
+                    }
+
+                    transaction.Commit();
+                }
+            }
+        }
         // Chèn dữ liệu vào bảng Groups
         public async Task InsertGroupData(IList<IList<object>> groupData)
         {
@@ -360,13 +408,14 @@ namespace AttendanceManagementSystem.DAL
                     {
                         var row = groupData[i];
                         command.CommandText = @"
-                            INSERT INTO Groups (CourseID, GroupName, SessionTime, ClassRoom)
-                            VALUES (@CourseID, @GroupName, @SessionTime, @ClassRoom);
+                            INSERT INTO Groups (CourseID, ClassID, GroupName, SessionTime, ClassRoom) 
+                            VALUES (@CourseID, @ClassID, @GroupName, @SessionTime, @ClassRoom);
                         ";
                         command.Parameters.AddWithValue("@CourseID", row[1]);
-                        command.Parameters.AddWithValue("@GroupName", row[2]);
-                        command.Parameters.AddWithValue("@SessionTime", row[3]);
-                        command.Parameters.AddWithValue("@ClassRoom", row[4]);
+                        command.Parameters.AddWithValue("@ClassID", row[2]);
+                        command.Parameters.AddWithValue("@GroupName", row[3]);
+                        command.Parameters.AddWithValue("@SessionTime", row[4]);
+                        command.Parameters.AddWithValue("@ClassRoom", row[5]);
 
                         await command.ExecuteNonQueryAsync();
                         command.Parameters.Clear();
@@ -405,8 +454,8 @@ namespace AttendanceManagementSystem.DAL
                 }
             }
         }
-        // Chèn dữ liệu vào bảng Sessions
-        public async Task InsertSessionData(IList<IList<object>> sessionData)
+        // Chèn dữ liệu vào bảng Weeks
+        public async Task InsertWeekData(IList<IList<object>> weekData)
         {
             using (var connection = new SQLiteConnection(_connectionString))
             {
@@ -416,16 +465,17 @@ namespace AttendanceManagementSystem.DAL
                     var command = connection.CreateCommand();
                     command.Transaction = transaction;
 
-                    for (int i = 1; i < sessionData.Count; i++)
+                    for (int i = 1; i < weekData.Count; i++)
                     {
-                        var row = sessionData[i];
+                        var row = weekData[i];
                         command.CommandText = @"
-                            INSERT INTO Sessions (CourseID, WeekNumber, SessionDate) 
-                            VALUES (@CourseID, @WeekNumber, @SessionDate);
+                            INSERT INTO Weeks (CourseID, WeekNumber, StartDate, EndDate) 
+                            VALUES (@CourseID, @WeekNumber, @StartDate, @EndDate);
                         ";
                         command.Parameters.AddWithValue("@CourseID", row[1]);
                         command.Parameters.AddWithValue("@WeekNumber", row[2]);
-                        command.Parameters.AddWithValue("@SessionDate", row[3]);
+                        command.Parameters.AddWithValue("@StartDate", row[3]);
+                        command.Parameters.AddWithValue("@EndDate", row[4]);
 
                         await command.ExecuteNonQueryAsync();
                         command.Parameters.Clear();
@@ -450,10 +500,10 @@ namespace AttendanceManagementSystem.DAL
                     {
                         var row = announcementData[i];
                         command.CommandText = @"
-                            INSERT INTO Announcements (SessionID, Content) 
-                            VALUES (@SessionID, @Content);
+                            INSERT INTO Announcements (WeekID, Content) 
+                            VALUES (@WeekID, @Content);
                         ";
-                        command.Parameters.AddWithValue("@SessionID", row[1]);
+                        command.Parameters.AddWithValue("@WeekID", row[1]);
                         command.Parameters.AddWithValue("@Content", row[2]);
 
                         await command.ExecuteNonQueryAsync();
@@ -479,10 +529,10 @@ namespace AttendanceManagementSystem.DAL
                     {
                         var row = attendanceLinkData[i];
                         command.CommandText = @"
-                            INSERT INTO AttendanceLinks (SessionID, TeacherID, Latitude, Longitude) 
-                            VALUES (@SessionID, @TeacherID, @Latitude, @Longitude);
+                            INSERT INTO AttendanceLinks (WeekID, TeacherID, Latitude, Longitude) 
+                            VALUES (@WeekID, @TeacherID, @Latitude, @Longitude);
                         ";
-                        command.Parameters.AddWithValue("@SessionID", row[1]);
+                        command.Parameters.AddWithValue("@WeekID", row[1]);
                         command.Parameters.AddWithValue("@TeacherID", row[2]);
                         command.Parameters.AddWithValue("@Latitude", row[3]);
                         command.Parameters.AddWithValue("@Longitude", row[4]);
@@ -510,11 +560,11 @@ namespace AttendanceManagementSystem.DAL
                     {
                         var row = attendanceData[i];
                         command.CommandText = @"
-                            INSERT INTO Attendances (StudentID, SessionID, Status, CheckedInAt, Latitude, Longitude) 
-                            VALUES (@StudentID, @SessionID, @Status, @CheckedInAt, @Latitude, @Longitude);
+                            INSERT INTO Attendances (StudentID, WeekID, Status, CheckedInAt, Latitude, Longitude) 
+                            VALUES (@StudentID, @WeekID, @Status, @CheckedInAt, @Latitude, @Longitude);
                         ";
                         command.Parameters.AddWithValue("@StudentID", row[1]);
-                        command.Parameters.AddWithValue("@SessionID", row[2]);
+                        command.Parameters.AddWithValue("@WeekID", row[2]);
                         command.Parameters.AddWithValue("@Status", row[3]);
                         command.Parameters.AddWithValue("@CheckedInAt", row[4]);
                         command.Parameters.AddWithValue("@Latitude", row[5]);
@@ -528,6 +578,6 @@ namespace AttendanceManagementSystem.DAL
                 }
             }
         }
+
     }
 }
-

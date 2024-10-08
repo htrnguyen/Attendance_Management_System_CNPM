@@ -24,9 +24,10 @@ public class DataLoader
         var termsData = await _googleSheetsRepo.GetSheetData("Terms!A1:D");
         var coursesData = await _googleSheetsRepo.GetSheetData("Courses!A1:D");
         var courseAssignmentsData = await _googleSheetsRepo.GetSheetData("CourseAssignments!A1:C");
-        var groupsData = await _googleSheetsRepo.GetSheetData("Groups!A1:E");
+        var classesData = await _googleSheetsRepo.GetSheetData("Classes!A1:C");
+        var groupsData = await _googleSheetsRepo.GetSheetData("Groups!A1:F");
         var EnrollmentsData = await _googleSheetsRepo.GetSheetData("Enrollments!A1:C");
-        var sessionsData = await _googleSheetsRepo.GetSheetData("Sessions!A1:D");
+        var weeksData = await _googleSheetsRepo.GetSheetData("Weeks!A1:E");
         var announcementsData = await _googleSheetsRepo.GetSheetData("Announcements!A1:C");
         var attendanceLinksData = await _googleSheetsRepo.GetSheetData("AttendanceLinks!A1:E");
         var attendancesData = await _googleSheetsRepo.GetSheetData("Attendances!A1:G");
@@ -52,9 +53,10 @@ public class DataLoader
             await _sqliteRepo.InsertTermData(termsData);
             await _sqliteRepo.InsertCourseData(coursesData);
             await _sqliteRepo.InsertCourseAssignmentData(courseAssignmentsData);
+            await _sqliteRepo.InsertClassData(classesData);
             await _sqliteRepo.InsertGroupData(groupsData);
             await _sqliteRepo.InsertEnrollmentData(EnrollmentsData);
-            await _sqliteRepo.InsertSessionData(sessionsData);
+            await _sqliteRepo.InsertWeekData(weeksData);
             await _sqliteRepo.InsertAnnouncementData(announcementsData);
             await _sqliteRepo.InsertAttendanceLinkData(attendanceLinksData);
             await _sqliteRepo.InsertAttendanceData(attendancesData);
@@ -67,6 +69,6 @@ public class DataLoader
         }
 
         // Hiển thị thông báo khi dữ liệu đã được tải thành công
-        //MessageBox.Show("Dữ liệu đã được tải thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        MessageBox.Show("Dữ liệu đã được tải thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 }
