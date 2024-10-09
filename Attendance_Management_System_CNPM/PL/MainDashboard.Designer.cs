@@ -50,6 +50,7 @@
             this.đăngXuấtToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.panelMain = new System.Windows.Forms.Panel();
             this.comboBoxTerms = new System.Windows.Forms.ComboBox();
+            this.pictureBoxReload = new System.Windows.Forms.PictureBox();
             this.pictureBoxAvt = new System.Windows.Forms.PictureBox();
             this.pictureBoxLogout = new System.Windows.Forms.PictureBox();
             this.pictureBoxChangePassword = new System.Windows.Forms.PictureBox();
@@ -63,6 +64,7 @@
             this.panelDashboard.SuspendLayout();
             this.flowLayoutPanelUserInfo.SuspendLayout();
             this.panelInfo.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxReload)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAvt)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxLogout)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxChangePassword)).BeginInit();
@@ -302,6 +304,18 @@
             this.comboBoxTerms.TabIndex = 10;
             this.comboBoxTerms.SelectedIndexChanged += new System.EventHandler(this.comboBoxTerms_SelectedIndexChanged);
             // 
+            // pictureBoxReload
+            // 
+            this.pictureBoxReload.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.pictureBoxReload.Image = global::Attendance_Management_System_CNPM.Properties.Resources.icons8_reset_50;
+            this.pictureBoxReload.Location = new System.Drawing.Point(385, 90);
+            this.pictureBoxReload.Name = "pictureBoxReload";
+            this.pictureBoxReload.Size = new System.Drawing.Size(39, 35);
+            this.pictureBoxReload.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBoxReload.TabIndex = 11;
+            this.pictureBoxReload.TabStop = false;
+            this.pictureBoxReload.Click += new System.EventHandler(this.pictureBoxReload_Click);
+            // 
             // pictureBoxAvt
             // 
             this.pictureBoxAvt.Anchor = System.Windows.Forms.AnchorStyles.None;
@@ -369,6 +383,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1178, 664);
+            this.Controls.Add(this.pictureBoxReload);
             this.Controls.Add(this.comboBoxTerms);
             this.Controls.Add(this.panelMain);
             this.Controls.Add(this.flowLayoutPanelUserInfo);
@@ -400,6 +415,7 @@
             this.flowLayoutPanelUserInfo.PerformLayout();
             this.panelInfo.ResumeLayout(false);
             this.panelInfo.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxReload)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAvt)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxLogout)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxChangePassword)).EndInit();
@@ -441,5 +457,6 @@
         private System.Windows.Forms.Panel panelLogout;
         private System.Windows.Forms.PictureBox pictureBoxLogout;
         private System.Windows.Forms.Label labelLogout;
+        private System.Windows.Forms.PictureBox pictureBoxReload;
     }
 }

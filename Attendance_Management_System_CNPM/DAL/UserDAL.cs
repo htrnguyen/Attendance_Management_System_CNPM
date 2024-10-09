@@ -1,5 +1,5 @@
-﻿using AttendanceManagementSystem.DAL;
-using Attendance_Management_System_CNPM.Models;
+﻿using Attendance_Management_System_CNPM.Models;
+using AttendanceManagementSystem.DAL;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;

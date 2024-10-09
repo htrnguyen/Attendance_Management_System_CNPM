@@ -2,6 +2,7 @@
 using Attendance_Management_System_CNPM.Models;
 using Attendance_Management_System_CNPM.PL.Login;
 using Attendance_Management_System_CNPM.PL.Teacher;
+using Attendance_Management_System_CNPM.DAL;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,6 +22,7 @@ namespace Attendance_Management_System_CNPM.PL.Student
         private Terms terms;
         private readonly StudentBLL studentBLL;
         private readonly TeacherBLL teacherBLL;
+        private readonly DataLoader dataLoader;
 
         private int termID;
         public MainDashboard(User user)
@@ -29,6 +31,7 @@ namespace Attendance_Management_System_CNPM.PL.Student
             this.user = user;
             this.studentBLL = new StudentBLL();
             this.teacherBLL = new TeacherBLL();
+            this.dataLoader = new DataLoader();
         }
         private void MainDashboard_Load(object sender, EventArgs e)
         {
@@ -125,6 +128,11 @@ namespace Attendance_Management_System_CNPM.PL.Student
         private void labelDashboard_Click(object sender, EventArgs e)
         {
             comboBoxTerms_SelectedIndexChanged(sender, e);
+        }
+
+        private async void pictureBoxReload_Click(object sender, EventArgs e)
+        {
+            await dataLoader.LoadClassesAndWeeksAsync();
         }
     }
 }

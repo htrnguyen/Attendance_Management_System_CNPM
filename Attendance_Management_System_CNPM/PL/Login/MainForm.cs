@@ -24,7 +24,8 @@ namespace Attendance_Management_System_CNPM.PL.Login
             // Khởi tạo DataLoader
             var googleSheetsRepo = new GoogleSheetsRepository();
             var sqliteRepo = new SQLiteRepository();
-            _dataLoader = new DataLoader(googleSheetsRepo, sqliteRepo);
+            //_dataLoader = new DataLoader(googleSheetsRepo, sqliteRepo);
+            _dataLoader = new DataLoader();
 
             // Khởi tạo PictureBox loading
             InitializeLoadingPictureBox();

@@ -10,6 +10,7 @@ namespace Attendance_Management_System_CNPM.Models
     {
         public int WeekID { get; set; }
         public int WeekNumber { get; set; }
-        public string StartDate { get; set; }       
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
     }
 }

@@ -213,6 +213,16 @@ namespace Attendance_Management_System_CNPM.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_reset_50 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-reset-50", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_show_password_96 {
             get {
                 object obj = ResourceManager.GetObject("icons8-show-password-96", resourceCulture);

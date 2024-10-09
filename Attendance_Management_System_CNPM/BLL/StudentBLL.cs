@@ -45,9 +45,14 @@ namespace Attendance_Management_System_CNPM.BLL
             return studentDAL.GetAnnouncements(WeekID);
         }
         // Kiểm tra giáo viên đã tạo link điểm danh chưa
-        public bool CheckAttendanceLink(int sessionID, int courseID, int teacherID)
+        public bool CheckAttendanceLink(int WeekID, int CourseID, int TeacherID)
         {
-            return studentDAL.CheckAttendanceLink(sessionID, courseID, teacherID);
+            return studentDAL.CheckAttendanceLink(WeekID, CourseID, TeacherID);
+        }
+        // Lấy toạ độ lớp học
+        public List<String> GetClassCoordinates(int ClassID)
+        {
+            return studentDAL.GetClassCoordinates(ClassID);
         }
     }
 }

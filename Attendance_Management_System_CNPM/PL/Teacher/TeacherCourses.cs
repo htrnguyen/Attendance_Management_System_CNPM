@@ -68,7 +68,7 @@ namespace Attendance_Management_System_CNPM.PL.Teacher
                 var courseLabel = CreateLabel($"{course.CourseName} - {course.CourseCode}", true, Color.FromArgb(0, 102, 204));
                 var groupLabel = CreateLabel($"Group: {course.GroupName}", false, Color.Black);
                 var timeLabel = CreateLabel($"Time: {course.SessionTime}", false, Color.Black);
-                var roomLabel = CreateLabel($"Room: {course.ClassRoom}", false, Color.Black);
+                var roomLabel = CreateLabel($"Room: {course.ClassName}", false, Color.Black);
 
                 courseLabel.Cursor = Cursors.Hand;
                 groupLabel.Cursor = Cursors.Hand;

@@ -13,7 +13,8 @@ namespace Attendance_Management_System_CNPM.Models
         public string CourseCode { get; set; }
         public string GroupName { get; set; }
         public string SessionTime { get; set; }
-        public string ClassRoom { get; set; }
         public int TeacherID { get; set; }
+        public int ClassID { get; set; }
+        public string ClassName { get; set; }
     }
 }

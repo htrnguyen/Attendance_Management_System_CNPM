@@ -6,6 +6,7 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Attendance_Management_System_CNPM.DAL
 {
@@ -102,8 +103,9 @@ namespace Attendance_Management_System_CNPM.DAL
                         c.courseCode,
                         g.groupName,
                         g.sessionTime,
-                        g.classroom,
-                        u_teacher.userID 
+                        u_teacher.userID,
+                        cl.classID,
+                        cl.className 
                     FROM 
                         Enrollments e
                     JOIN 
@@ -118,11 +120,13 @@ namespace Attendance_Management_System_CNPM.DAL
                         CourseAssignments ca ON c.courseID = ca.courseID
                     JOIN 
                         Users u_teacher ON ca.teacherID = u_teacher.userID
+                    JOIN 
+                        Classes cl ON g.classID = cl.classID  -- Kết nối với bảng Classes để lấy tên lớp
                     WHERE 
                         u.userID = @UserID
-                        AND u.roleID = 1
-                        AND t.termID = @TermID
-                        ";
+                        AND u.roleID = 1  -- Chỉ lọc sinh viên
+                        AND t.termID = @TermID;  -- Điều kiện cho termID
+                    ";
                     cmd.Parameters.AddWithValue("@UserID", UserID);
                     cmd.Parameters.AddWithValue("@TermID", TermID);
                     using (var reader = cmd.ExecuteReader())
@@ -136,8 +140,9 @@ namespace Attendance_Management_System_CNPM.DAL
                                 CourseCode = reader["courseCode"].ToString(),
                                 GroupName = reader["groupName"].ToString(),
                                 SessionTime = reader["sessionTime"].ToString(),
-                                ClassRoom = reader["classroom"].ToString(),
-                                TeacherID = Convert.ToInt32(reader["userID"])
+                                TeacherID = Convert.ToInt32(reader["userID"]),
+                                ClassID = Convert.ToInt32(reader["classID"]),
+                                ClassName = reader["className"].ToString()
                             };
                             courses.Add(course);
                         }
@@ -156,20 +161,21 @@ namespace Attendance_Management_System_CNPM.DAL
                 using (var cmd = new SQLiteCommand(conn))
                 {
                     cmd.CommandText = @"
-                        SELECT 
-	                        s.sessionID,
-                            s.weekNumber,
-                            s.sessionDate
-                        FROM 
-                            Courses c
-                        JOIN 
-                            Terms t ON c.termID = t.termID
-                        JOIN 
-                            Sessions s ON c.courseID = s.courseID
-                        WHERE 
-                            c.courseID = @CourseID
-                        ORDER BY 
-                            s.weekNumber, s.sessionDate;
+                    SELECT 
+                        w.weekID,
+                        w.weekNumber,
+                        w.startDate,
+                        w.endDate
+                    FROM 
+                        Courses c
+                    JOIN 
+                        Weeks w ON c.courseID = w.courseID  -- Thay đổi từ Sessions sang Weeks
+                    JOIN 
+                        Terms t ON c.termID = t.termID
+                    WHERE 
+                        c.courseID = @CourseID
+                    ORDER BY 
+                        w.weekNumber;  -- Sắp xếp theo tuần
                     ";
                     cmd.Parameters.AddWithValue("@CourseID", CourseID);
                     using (var reader = cmd.ExecuteReader())
@@ -178,9 +184,10 @@ namespace Attendance_Management_System_CNPM.DAL
                         {
                             var week = new Weeks
                             {
-                                WeekID = Convert.ToInt32(reader["sessionID"]),
+                                WeekID = Convert.ToInt32(reader["weekID"]),
                                 WeekNumber = Convert.ToInt32(reader["weekNumber"]),
-                                StartDate = reader["sessionDate"].ToString()
+                                StartDate = reader["startDate"].ToString(),
+                                EndDate = reader["endDate"].ToString()
                             };
                             weeks.Add(week);
                         }
@@ -199,15 +206,16 @@ namespace Attendance_Management_System_CNPM.DAL
                 using (var cmd = new SQLiteCommand(conn))
                 {
                     cmd.CommandText = @"
-                        SELECT 
-                            a.announcementID,
-                            a.content
-                        FROM 
-                            Announcements a
-                        JOIN 
-                            Sessions s ON a.sessionID = s.sessionID
-                        WHERE 
-                            s.sessionID = @WeekID
+                    SELECT 
+                        a.announcementID,
+                        a.content
+                    FROM 
+                        Announcements a
+                    JOIN 
+                        Weeks w ON a.weekID = w.weekID  -- Kết nối bảng Announcements với Weeks
+                    WHERE 
+                        w.weekID = @WeekID;  -- Sử dụng weekID trong điều kiện
+
                     ";
                     cmd.Parameters.AddWithValue("@WeekID", WeekID);
                     using (var reader = cmd.ExecuteReader())
@@ -227,7 +235,7 @@ namespace Attendance_Management_System_CNPM.DAL
             return announcements;
         }
         // Kiểm tra Giáo viên đã tạo link điểm danh chưa
-        public bool CheckAttendanceLink(int sessionID, int courseID, int teacherID)
+        public bool CheckAttendanceLink(int WeekID, int CourseID, int TeacherID)
         {
             using (var conn = new SQLiteConnection(_connectionString))
             {
@@ -236,40 +244,71 @@ namespace Attendance_Management_System_CNPM.DAL
                 {
                     cmd.CommandText = @"
                         SELECT 
-                            al.linkID,
-                            al.sessionID,
-                            al.teacherID,
-                            s.courseID,
-                            c.courseCode,
-                            s.weekNumber,
-                            s.sessionDate,
-                            u.fullname AS teacherName
+                            w.weekID,
+                            w.weekNumber,
+                            w.startDate,
+                            w.endDate,
+                            w.isAttendanceLinkCreated
                         FROM 
-                            AttendanceLinks al
+                            Weeks w
                         JOIN 
-                            Sessions s ON al.sessionID = s.sessionID
+                            Courses c ON w.courseID = c.courseID
                         JOIN 
-                            Courses c ON s.courseID = c.courseID
+                            CourseAssignments ca ON c.courseID = ca.courseID
                         JOIN 
-                            Users u ON al.teacherID = u.userID
+                            Users u ON ca.teacherID = u.userID
                         WHERE 
-                            s.sessionID = @SessionID
-                            AND c.courseID = @CourseID
-                            AND al.teacherID = @TeacherID;
+                            u.userID = @TeacherID -- ID của giáo viên
+                            AND w.weekID = @WeekID -- ID của tuần cần kiểm tra
+                            AND c.courseID = @CourseID; -- ID của khóa học cần kiểm tra
                     ";
-                    cmd.Parameters.AddWithValue("@SessionID", sessionID);
-                    cmd.Parameters.AddWithValue("@CourseID", courseID);
-                    cmd.Parameters.AddWithValue("@TeacherID", teacherID);
+                    cmd.Parameters.AddWithValue("@WeekID", WeekID);
+                    cmd.Parameters.AddWithValue("@CourseID", CourseID);
+                    cmd.Parameters.AddWithValue("@TeacherID", TeacherID);
                     using (var reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            return true;
+                            return Convert.ToBoolean(reader["isAttendanceLinkCreated"]);
                         }
-                        return false;
+                        else
+                        {
+                            return false;
+                        }
                     }
                 }
             }
+        }
+        // Lấy toạ độ của lớp
+        public List<string> GetClassCoordinates(int ClassID)
+        {
+            List<string> coordinates = new List<string>();
+            using (var conn = new SQLiteConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new SQLiteCommand(conn))
+                {
+                    cmd.CommandText = @"
+                    SELECT 
+                        latitude,
+                        longitude
+                    FROM 
+                        Classes
+                    WHERE 
+                        classID = @ClassID
+                    ";
+                    cmd.Parameters.AddWithValue("@ClassID", ClassID);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            coordinates.Add(reader["latitude"].ToString());
+                            coordinates.Add(reader["longitude"].ToString());
+                        }
+                    }
+                }
+            }
+            return coordinates;
         }
     }
 }
